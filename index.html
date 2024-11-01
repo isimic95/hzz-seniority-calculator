@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Time Sum Calculator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f6f8;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            min-height: 100vh;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            width: 90%;
+            max-width: 600px;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333333;
+        }
+
+        textarea {
+            width: 100%;
+            height: 150px;
+            padding: 10px;
+            margin-top: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #cccccc;
+            border-radius: 4px;
+            resize: vertical;
+            font-family: monospace;
+            font-size: 14px;
+        }
+
+        button {
+            background-color: #007BFF;
+            color: #ffffff;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #e9f7ef;
+            border: 1px solid #d4edda;
+            border-radius: 4px;
+            color: #155724;
+            font-size: 18px;
+            text-align: center;
+        }
+
+        .error {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            color: #721c24;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            button {
+                padding: 10px 16px;
+                font-size: 14px;
+            }
+
+            .result, .error {
+                font-size: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Time Sum Calculator</h1>
+        <label for="inputValues">Enter time values (one per line):</label>
+        <textarea id="inputValues" placeholder="npr.,&#10;00g 02m 00d&#10;00g03m26d"></textarea>
+        <button id="calculateBtn">Calculate Sum</button>
+        <div id="output" class="result" style="display: none;"></div>
+        <div id="error" class="error" style="display: none;"></div>
+    </div>
+
+    <script>
+        document.getElementById('calculateBtn').addEventListener('click', function() {
+            const input = document.getElementById('inputValues').value.trim();
+            const outputDiv = document.getElementById('output');
+            const errorDiv = document.getElementById('error');
+            outputDiv.style.display = 'none';
+            errorDiv.style.display = 'none';
+
+            if (!input) {
+                showError('Please enter at least one time value.');
+                return;
+            }
+
+            const lines = input.split(/\r?\n/).filter(line => line.trim() !== '');
+            try {
+                const sum = sumTimeValues(lines);
+                outputDiv.textContent = `Total Sum: ${sum}`;
+                outputDiv.style.display = 'block';
+            } catch (error) {
+                showError(error.message);
+            }
+
+            function showError(message) {
+                errorDiv.textContent = message;
+                errorDiv.style.display = 'block';
+            }
+
+            function sumTimeValues(values) {
+                let totalYears = 0;
+                let totalMonths = 0;
+                let totalDays = 0;
+
+                // Regular expression to match both "XXg YYm ZZd" and "XXgYYmZZd"
+                const pattern = /^(\d{2})g\s*(\d{2})m\s*(\d{2})d$/;
+
+                values.forEach((value, index) => {
+                    const trimmedValue = value.trim();
+                    const match = trimmedValue.match(pattern);
+                    if (!match) {
+                        throw new Error(`Invalid format in line ${index + 1}: '${value}'. Expected format 'XXgYYmZZd' or 'XXg YYm ZZd'.`);
+                    }
+
+                    const [_, yearsStr, monthsStr, daysStr] = match;
+                    const years = parseInt(yearsStr, 10);
+                    const months = parseInt(monthsStr, 10);
+                    const days = parseInt(daysStr, 10);
+
+                    totalYears += years;
+                    totalMonths += months;
+                    totalDays += days;
+                });
+
+                // Normalize days to months (1 month = 30 days)
+                const extraMonthsFromDays = Math.floor(totalDays / 30);
+                totalDays = totalDays % 30;
+                totalMonths += extraMonthsFromDays;
+
+                // Normalize months to years (1 year = 12 months)
+                const extraYearsFromMonths = Math.floor(totalMonths / 12);
+                totalMonths = totalMonths % 12;
+                totalYears += extraYearsFromMonths;
+
+                // Format the result with leading zeros
+                const formattedYears = String(totalYears).padStart(2, '0');
+                const formattedMonths = String(totalMonths).padStart(2, '0');
+                const formattedDays = String(totalDays).padStart(2, '0');
+
+                return `${formattedYears}g ${formattedMonths}m ${formattedDays}d`;
+            }
+        });
+    </script>
+</body>
+</html>
