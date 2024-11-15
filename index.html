@@ -99,7 +99,7 @@
     <div class="container">
         <h1>Time Sum Calculator</h1>
         <label for="inputValues">Enter time values (one per line):</label>
-        <textarea id="inputValues" placeholder="npr.,&#10;00g 02m 00d&#10;00g03m26d"></textarea>
+        <textarea id="inputValues" placeholder="e.g.,&#10;00g 02m 00d&#10;00g03m125d"></textarea>
         <button id="calculateBtn">Calculate Sum</button>
         <div id="output" class="result" style="display: none;"></div>
         <div id="error" class="error" style="display: none;"></div>
@@ -137,14 +137,14 @@
                 let totalMonths = 0;
                 let totalDays = 0;
 
-                // Regular expression to match both "XXg YYm ZZd" and "XXgYYmZZd"
-                const pattern = /^(\d{2})g\s*(\d{2})m\s*(\d{2})d$/;
+                // Regular expression to match both "XXg YYm ZZZd" and "XXgYYmZZZd"
+                const pattern = /^(\d{2})g\s*(\d{2})m\s*(\d{1,3})d$/;
 
                 values.forEach((value, index) => {
                     const trimmedValue = value.trim();
                     const match = trimmedValue.match(pattern);
                     if (!match) {
-                        throw new Error(`Invalid format in line ${index + 1}: '${value}'. Expected format 'XXgYYmZZd' or 'XXg YYm ZZd'.`);
+                        throw new Error(`Invalid format in line ${index + 1}: '${value}'. Expected format 'XXgYYmZZZd' or 'XXg YYm ZZZd'.`);
                     }
 
                     const [_, yearsStr, monthsStr, daysStr] = match;
