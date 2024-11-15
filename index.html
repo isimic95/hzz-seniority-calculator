@@ -99,15 +99,35 @@
     <div class="container">
         <h1>Time Sum Calculator</h1>
         <label for="inputValues">Enter time values (one per line):</label>
-        <textarea id="inputValues" placeholder="e.g.,&#10;00g 02m 00d&#10;00g03m125d"></textarea>
+        <textarea id="inputValues" placeholder="e.g.,&#10;00g 02m 00d&#10;00g03m125d">00g00m000d</textarea>
         <button id="calculateBtn">Calculate Sum</button>
         <div id="output" class="result" style="display: none;"></div>
         <div id="error" class="error" style="display: none;"></div>
     </div>
 
     <script>
+        const textarea = document.getElementById('inputValues');
+
+        // Function to insert 'gmd' on pressing Enter
+        textarea.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Prevent the default newline
+                const cursorPosition = textarea.selectionStart;
+                const textBeforeCursor = textarea.value.substring(0, cursorPosition);
+                const textAfterCursor = textarea.value.substring(textarea.selectionEnd);
+                
+                // Insert newline and 'gmd'
+                const newText = textBeforeCursor + '\n00g00m000d' + textAfterCursor;
+                textarea.value = newText;
+
+                // Move the cursor to after the inserted 'gmd'
+                const newCursorPosition = cursorPosition + 1 + 3; // \n + 'gmd'
+                textarea.setSelectionRange(newCursorPosition, newCursorPosition);
+            }
+        });
+
         document.getElementById('calculateBtn').addEventListener('click', function() {
-            const input = document.getElementById('inputValues').value.trim();
+            const input = textarea.value.trim();
             const outputDiv = document.getElementById('output');
             const errorDiv = document.getElementById('error');
             outputDiv.style.display = 'none';
@@ -142,6 +162,12 @@
 
                 values.forEach((value, index) => {
                     const trimmedValue = value.trim();
+
+                    // Skip lines that are exactly 'gmd'
+                    if (trimmedValue.toLowerCase() === 'gmd') {
+                        return;
+                    }
+
                     const match = trimmedValue.match(pattern);
                     if (!match) {
                         throw new Error(`Invalid format in line ${index + 1}: '${value}'. Expected format 'XXgYYmZZZd' or 'XXg YYm ZZZd'.`);
